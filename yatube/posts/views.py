@@ -9,11 +9,13 @@ from yatube.settings import PAGINATION_NUM
 
 User = get_user_model()
 
+
 def pagination(request, post_list, num_on_page):
     paginator = Paginator(post_list, num_on_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
+
 
 def index(request):
     """View - функция для главной страницы проекта."""
@@ -36,6 +38,7 @@ def group_posts(request, slug):
     }
     return render(request, 'posts/group_list.html', context)
 
+
 def profile(request, username):
     profile = get_object_or_404(User, username=username)
     post_list = (
@@ -55,6 +58,7 @@ def profile(request, username):
         'following': following,
     }
     return render(request, 'posts/profile.html', context)
+
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
