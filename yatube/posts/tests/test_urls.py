@@ -40,33 +40,27 @@ class PostURLTests(TestCase):
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем авторизованый клиент
         self.user = User.objects.get(username="Test_User")
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    # Проверяем общедоступные страницы
     def test_public_pages(self):
         for data in self.public_urls:
             print(data[0])
             response = self.guest_client.get(data[0])
             self.assertEqual(response.status_code, 200)
 
-    # Проверяем доступ для авторизованного пользователя и автора
     def test_private_pages(self):
         for data in self.private_urls:
             response = self.authorized_client.get(data[0])
             self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    # Проверяем статус 404 для авторизованного пользователя
     def test_task_list_url_redirect_anonymous(self):
         """Страница /unexisting_page/ не существует."""
         response = self.authorized_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_url_names = {
