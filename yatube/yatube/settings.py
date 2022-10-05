@@ -6,10 +6,13 @@ SECRET_KEY = 'noooooooooo'
 
 DEBUG = True
 
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+
 ALLOWED_HOSTS = [
-    '*',
-    'www.legkiiandr.pythonanywhere.com',
-    'legkiiandr.pythonanywhere.com',
+    'localhost',
+    '127.0.0.1',
+    '[::1]',
+    'testserver',
 ]
 
 INSTALLED_APPS = [
@@ -24,7 +27,6 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'about.apps.AboutConfig',
     'sorl.thumbnail',
-    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -35,11 +37,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-]
-
-INTERNAL_IPS = [
-    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'yatube.urls'
@@ -107,8 +104,6 @@ LOGIN_REDIRECT_URL = 'posts:index'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
-CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
