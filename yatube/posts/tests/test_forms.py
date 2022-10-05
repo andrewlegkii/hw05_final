@@ -39,10 +39,18 @@ class PostFormTests(TestCase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
+        # Модуль shutil - библиотека Python с удобными инструментами
+        # для управления файлами и директориями:
+        # создание/удаление/копирование/перемещение, изменение папок и файлов
+        # Метод shutil.rmtree удаляет директорию и всё её содержимое
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def test_create_post(self):
         posts_count = Post.objects.count()
+
+        # Для тестирования загрузки изображений
+        # берём байт-последовательность картинки,
+        # состоящей из двух пикселей: белого и чёрного
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
                      b'\x01\x00\x80\x00\x00\x00\x00\x00'
                      b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -76,11 +84,11 @@ class PostFormTests(TestCase):
             'text': 'Новый тестовый текст',
         }
         self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={'post_id': self.post.id}),
+            reverse('posts:post_edit', kwargs={'post_id': '1'}),
             data=form_data,
             follow=True
         )
-        new_post = Post.objects.get(id=self.post.id)
+        new_post = Post.objects.get(id=1)
         self.assertNotEqual(old_post.text, new_post.text)
 
     def test_unauth_user_cant_publish_post(self):
@@ -120,5 +128,4 @@ class PostFormTests(TestCase):
             data=comment_form,
             follow=True
         )
-
         self.assertEqual(Comment.objects.count(), comments_count + 1)

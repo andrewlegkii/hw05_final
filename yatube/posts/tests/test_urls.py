@@ -14,6 +14,7 @@ class PostURLTests(TestCase):
         cls.user = User.objects.create(username="Test_User",)
 
         cls.group = Group.objects.create(
+            id="10",
             title="группа",
             slug="one_group",
             description="проверка описания",
@@ -21,8 +22,8 @@ class PostURLTests(TestCase):
 
         cls.post = Post.objects.create(
             text='Тестовый текст',
-            author=cls.user,
-            group=cls.group
+            author=User.objects.get(username="Test_User"),
+            group=Group.objects.get(title="группа"),
         )
 
         cls.post_url = f'/posts/{cls.post.id}/'
@@ -37,27 +38,21 @@ class PostURLTests(TestCase):
             ('/create/', 'create_post.html'),
             (cls.post_edit_url, 'create_post.html')
         )
-        cls.templates_url_names = {
-            '/': 'posts/index.html',
-            '/group/one_group/': 'posts/group_list.html',
-            '/profile/Test_User/': 'posts/profile.html',
-            '/posts/1/': 'posts/post_detail.html',
-            '/posts/1/edit/': 'posts/create_post.html',
-            '/create/': 'posts/create_post.html',
-        }
 
     def setUp(self):
         # Создаем неавторизованный клиент
         self.guest_client = Client()
         # Создаем авторизованый клиент
+        self.user = User.objects.get(username="Test_User")
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
     # Проверяем общедоступные страницы
     def test_public_pages(self):
-        for url, template in self.public_urls:
-            response = self.guest_client.get(url)
-            self.assertEqual(response.status_code, 200, template)
+        for data in self.public_urls:
+            print(data[0])
+            response = self.guest_client.get(data[0])
+            self.assertEqual(response.status_code, 200)
 
     # Проверяем доступ для авторизованного пользователя и автора
     def test_private_pages(self):
@@ -74,7 +69,15 @@ class PostURLTests(TestCase):
     # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        for url, template in self.templates_url_names.items():
+        templates_url_names = {
+            '/': 'posts/index.html',
+            '/group/one_group/': 'posts/group_list.html',
+            '/profile/Test_User/': 'posts/profile.html',
+            '/posts/1/': 'posts/post_detail.html',
+            '/posts/1/edit/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
+        }
+        for url, template in templates_url_names.items():
             with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertTemplateUsed(response, template)

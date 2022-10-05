@@ -12,19 +12,13 @@ from django.core.cache import cache
 
 User = get_user_model()
 
-# Создаем временную папку для медиа-файлов;
-# на момент теста медиа папка будет переопределена
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
-
-# Для сохранения media-файлов в тестах будет использоваться
-# временная папка TEMP_MEDIA_ROOT, а потом мы ее удалим
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostsPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создадим запись в БД
         cls.user = User.objects.create(username="Test_User",)
 
         cls.group = Group.objects.create(
@@ -71,12 +65,6 @@ class PostsPagesTests(TestCase):
             cls.group_url,
             cls.profile_url
         )
-        cls.pages_names = [
-            reverse(cls.index_url[0]),
-            reverse(cls.group_url[0], kwargs={'slug': cls.group_url[2]}),
-            reverse(cls.profile_url[0],
-                    kwargs={'username': cls.profile_url[2]}),
-        ]
         cls.templates_pages_names = {
             reverse(cls.index_url[0]): cls.index_url[1],
             reverse(cls.group_url[0], kwargs={'slug': cls.group_url[2]}):
@@ -91,6 +79,12 @@ class PostsPagesTests(TestCase):
             cls.edit_post_url[1],
             reverse(cls.new_post_url[0]): cls.new_post_url[1],
         }
+        cls.pages_names = [
+            reverse(cls.index_url[0]),
+            reverse(cls.group_url[0], kwargs={'slug': cls.group_url[2]}),
+            reverse(cls.profile_url[0],
+                    kwargs={'username': cls.profile_url[2]}),
+        ]
         cls.reverse_page_names_post = {
             reverse(cls.index_url[0]): cls.group_url[2],
             reverse(cls.group_url[0], kwargs={'slug': cls.group_url[2]}):
@@ -106,7 +100,6 @@ class PostsPagesTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
-        # Создаем неавторизованный+авторизованый клиент и фолловера
         self.guest_client = Client()
         self.user = User.objects.get(username="Test_User")
         self.authorized_client = Client()
@@ -115,19 +108,23 @@ class PostsPagesTests(TestCase):
         self.authorized_follower = Client()
         self.authorized_follower.force_login(self.follower)
 
-    # Проверяем используемые шаблоны
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        # Проверяем, что при обращении к name вызывается HTML-шаблон
         for reverse_name, template in self.templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-    # Проверка словаря контекста страниц
     def test_index_page_show_correct_context(self):
         """index,group_list,profile с правильным контекстом."""
-        for template in self.pages_names:
+        pages_names = [
+            reverse(self.index_url[0]),
+            reverse(self.group_url[0], kwargs={'slug': self.group_url[2]}),
+            reverse(self.profile_url[0],
+                    kwargs={'username': self.profile_url[2]}),
+        ]
+
+        for template in pages_names:
             with self.subTest(template=template):
                 response = self.guest_client.get(template)
                 first_object = response.context['page_obj'][0]

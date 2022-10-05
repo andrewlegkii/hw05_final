@@ -4,15 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 from django.contrib.auth import get_user_model
-
 from yatube.settings import PAGINATION_NUM
-
-from posts.forms import PostForm
-
-from .models import Group, Post
-
-User = get_user_model()
-
 
 def pagination(request, post_list, num_on_page):
     paginator = Paginator(post_list, num_on_page)
@@ -20,43 +12,57 @@ def pagination(request, post_list, num_on_page):
     page_obj = paginator.get_page(page_number)
     return page_obj
 
-
 def index(request):
-    """View - функция для главной страницы проекта."""
-
-    post_list = Post.objects.all()
-    page_obj = pagination(request, post_list, PAGINATION_NUM)
-    context = {
-        'page_obj': page_obj
-    }
-    return render(request, 'posts/index.html', context)
+    text = 'Последние обновления на сайте'
+    post_list = Post.objects.select_related('author', 'group').all()
+    paginator = Paginator(post_list, PAGINATION_NUM)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'page_obj': page_obj, 'text': text}
+    template = 'posts/index.html'
+    return render(request, template, context)
 
 
 def group_posts(request, slug):
-    """View - функция для страницы с постами, отфильтрованными по группам."""
-
-    group = get_object_or_404(Group, slug=slug)
-    posts = group.posts.all()
-    page_obj = pagination(request, posts, PAGINATION_NUM)
+    group = get_object_or_404(
+        Group.objects.prefetch_related("posts"), slug=slug)
+    post_list = group.posts.all()
+    paginator = Paginator(post_list, PAGINATION_NUM)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'group': group,
         'page_obj': page_obj,
+        'group': group,
     }
     return render(request, 'posts/group_list.html', context)
 
 
 def profile(request, username):
-    """View - функция для страницы с постами пользователя,
-       вошедшего на сайт.
-    """
-    author = get_object_or_404(User, username=username)
-    user = author.posts.all()
-    page_obj = pagination(request, user, PAGINATION_NUM)
-
-    context = {'author': author,
-               'page_obj': page_obj,
-               }
+    profile = get_object_or_404(User, username=username)
+    post_list = (
+        Post.objects.select_related("author")
+        .filter(author=profile).all()
+    )
+    posts_count = post_list.count()
+    paginator = Paginator(post_list, PAGINATION_NUM)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    """if request.user.is_authenticated:
+        following = Follow.objects.filter(
+            user=request.user, author=profile).exists()
+    else:
+        following = False"""
+    # Можно такой логикой заменить верхний блок(совет ревьюера)
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user, author=profile).exists()
+    context = {
+        'profile': profile,
+        'posts_count': posts_count,
+        'page_obj': page_obj,
+        'following': following,
+    }
     return render(request, 'posts/profile.html', context)
+
 
 
 def post_detail(request, post_id):
@@ -66,43 +72,43 @@ def post_detail(request, post_id):
         .filter(author=post.author).all()
     )
     posts_count = post_list.count()
-    context = {'post': post, 'posts_count': posts_count, }
+    form = CommentForm(request.POST or None)
+    comments = post.comments.all()
+    context = {
+        'post': post,
+        'posts_count': posts_count,
+        'form': form,
+        'comments': comments,
+    }
     return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-
-    form = PostForm(request.POST or None)
-    """View - функция для создания поста."""
-
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect('posts:profile', request.user.username)
-        return render(request, 'posts/create_post.html', {"form": form})
-    form = PostForm()
-    return render(request, 'posts/create_post.html', {"form": form, })
-
-
-@login_required
-def post_edit(request, post_id):
-    """View - функция для редактирования проекта."""
-
-    post = get_object_or_404(Post, id=post_id)
-    if post.author != request.user:
-        return redirect('posts:post_detail', pk=post_id)
-    form = PostForm(request.POST or None, instance=post)
+    form = PostForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
         post.save()
-        return redirect('posts:post_detail', post_id)
-    return render(request, 'posts/create_post.html',
-                  {"form": form, 'post': post, })
+        return redirect('posts:profile', post.author)
+    return render(request, 'posts/create_post.html', {'form': form})
+
+
+@login_required
+def post_edit(request, post_id):
+    is_edit = True
+    post = get_object_or_404(Post, pk=post_id)
+    if post.author == request.user:
+        form = PostForm(request.POST or None,
+                        files=request.FILES or None, instance=post)
+        if form.is_valid():
+            post = form.save()
+            return redirect('posts:post_detail', post.pk)
+        form = PostForm(instance=post)
+        return render(request, "posts/create_post.html",
+                      {'form': form, "is_edit": is_edit})
+    else:
+        return redirect('posts:post_detail', post.pk)
 
 
 @login_required

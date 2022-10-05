@@ -2,14 +2,14 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'nooooooooooooo'
+SECRET_KEY = 'noooooooooo'
 
 DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',
-    'www.legkiii.pythonanywhere.com',
-    'legkiii.pythonanywhere.com',
+    'www.legkiiandr.pythonanywhere.com',
+    'legkiiandr.pythonanywhere.com',
 ]
 
 INSTALLED_APPS = [
@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'about.apps.AboutConfig',
     'sorl.thumbnail',
-    'debug_toolbar'
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -120,7 +120,3 @@ CACHES = {
 }
 
 PAGINATION_NUM = 10
-
-POSTS_PER_PAGE = 13
-
-PAGE_TEST_OFFSET = 1
