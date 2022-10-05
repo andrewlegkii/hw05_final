@@ -4,7 +4,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 from django.contrib.auth import get_user_model
+
 from yatube.settings import PAGINATION_NUM
+
+User = get_user_model()
 
 def pagination(request, post_list, num_on_page):
     paginator = Paginator(post_list, num_on_page)
@@ -14,7 +17,6 @@ def pagination(request, post_list, num_on_page):
 
 def index(request):
     """View - функция для главной страницы проекта."""
-
     post_list = Post.objects.all()
     page_obj = pagination(request, post_list, PAGINATION_NUM)
     context = {
@@ -25,7 +27,6 @@ def index(request):
 
 def group_posts(request, slug):
     """View - функция для страницы с постами, отфильтрованными по группам."""
-
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     page_obj = pagination(request, posts, PAGINATION_NUM)
@@ -54,8 +55,6 @@ def profile(request, username):
         'following': following,
     }
     return render(request, 'posts/profile.html', context)
-
-
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
