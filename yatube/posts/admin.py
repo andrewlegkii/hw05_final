@@ -9,6 +9,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('pub_date',)
     empty_value_display = '-пусто-'
 
+
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('slug', 'title', 'description')
     search_fields = ('title',)

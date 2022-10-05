@@ -12,8 +12,6 @@ ALLOWED_HOSTS = [
     'legkiii.pythonanywhere.com',
 ]
 
-
-
 INSTALLED_APPS = [
     'posts.apps.PostsConfig',
     'django.contrib.admin',
@@ -68,16 +66,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'yatube.wsgi.application'
 
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -94,8 +88,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
 LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'W-SU'
@@ -111,7 +103,6 @@ STATIC_URL = '/static/'
 LOGIN_URL = 'users:login'
 
 LOGIN_REDIRECT_URL = 'posts:index'
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 

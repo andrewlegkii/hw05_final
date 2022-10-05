@@ -37,6 +37,14 @@ class PostURLTests(TestCase):
             ('/create/', 'create_post.html'),
             (cls.post_edit_url, 'create_post.html')
         )
+        cls.templates_url_names = {
+            '/': 'posts/index.html',
+            '/group/one_group/': 'posts/group_list.html',
+            '/profile/Test_User/': 'posts/profile.html',
+            '/posts/1/': 'posts/post_detail.html',
+            '/posts/1/edit/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
+        }
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -66,15 +74,7 @@ class PostURLTests(TestCase):
     # Проверка вызываемых шаблонов для каждого адреса
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        templates_url_names = {
-            '/': 'posts/index.html',
-            '/group/one_group/': 'posts/group_list.html',
-            '/profile/Test_User/': 'posts/profile.html',
-            '/posts/1/': 'posts/post_detail.html',
-            '/posts/1/edit/': 'posts/create_post.html',
-            '/create/': 'posts/create_post.html',
-        }
-        for url, template in templates_url_names.items():
+        for url, template in self.templates_url_names.items():
             with self.subTest(url=url):
                 response = self.authorized_client.get(url)
                 self.assertTemplateUsed(response, template)
