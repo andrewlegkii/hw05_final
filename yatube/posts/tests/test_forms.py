@@ -56,7 +56,7 @@ class PostFormTests(TestCase):
         form_data = {
             'text': 'Тестовый текст',
             'group': self.group.pk,
-            'group': uploaded,
+            'image': uploaded,
         }
 
         self.authorized_client.post(
@@ -67,7 +67,7 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
         self.assertFormError(posts_count, 'text', 'group',
-                             'group', 'errors')
+                             'image', 'errors')
 
     def test_edit_post(self):
         old_post = self.post
