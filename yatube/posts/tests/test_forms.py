@@ -66,7 +66,7 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
-        self.assertFormError()
+        self.assertFormError('form', 'field', 'errors')
 
     def test_edit_post(self):
         old_post = self.post
