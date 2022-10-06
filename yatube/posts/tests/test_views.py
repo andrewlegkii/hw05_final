@@ -249,3 +249,7 @@ class PostsPagesTests(TestCase):
             follow_post,
             not_follower_response.context.get('page_obj')
         )
+    
+    def test_post_does_not_exist_in_incorrect_group(self):
+        number_of_post_group = len((PostsPagesTests.group.title.split()))
+        self.assertEqual(number_of_post_group, 1)

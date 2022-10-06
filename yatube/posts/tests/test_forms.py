@@ -1,3 +1,4 @@
+from email.mime import image
 import shutil
 import tempfile
 
@@ -66,6 +67,7 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
+        self.assertFormError(Post.objects.count(), small_gif, image)
 
     def test_edit_post(self):
         old_post = self.post

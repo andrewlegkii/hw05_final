@@ -45,15 +45,11 @@ def profile(request, username):
         Post.objects.select_related("author")
         .filter(author=profile).all()
     )
-    posts_count = post_list.count()
-    paginator = Paginator(post_list, PAGINATION_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = pagination(request, post_list, PAGINATION_NUM)
     following = request.user.is_authenticated and Follow.objects.filter(
         user=request.user, author=profile).exists()
     context = {
         'profile': profile,
-        'posts_count': posts_count,
         'page_obj': page_obj,
         'following': following,
     }
@@ -66,12 +62,10 @@ def post_detail(request, post_id):
         Post.objects.select_related("author", "group")
         .filter(author=post.author).all()
     )
-    posts_count = post_list.count()
     form = CommentForm(request.POST or None)
     comments = post.comments.all()
     context = {
         'post': post,
-        'posts_count': posts_count,
         'form': form,
         'comments': comments,
     }
@@ -91,20 +85,18 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
-    is_edit = True
-    post = get_object_or_404(Post, pk=post_id)
-    if post.author == request.user:
-        form = PostForm(request.POST or None,
-                        files=request.FILES or None, instance=post)
-        if form.is_valid():
-            post = form.save()
-            return redirect('posts:post_detail', post.pk)
-        form = PostForm(instance=post)
-        return render(request, "posts/create_post.html",
-                      {'form': form, "is_edit": is_edit})
-    else:
-        return redirect('posts:post_detail', post.pk)
-
+    """View - функция для редактирования проекта."""
+    post = get_object_or_404(Post, id=post_id)
+    if post.author != request.user:
+        return redirect('posts:post_detail', pk=post_id)
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        return redirect('posts:post_detail', post_id)
+    return render(request, 'posts/create_post.html',
+                  {"form": form, 'post': post, })
 
 @login_required
 def add_comment(request, post_id):
@@ -122,9 +114,8 @@ def add_comment(request, post_id):
 def follow_index(request):
     post_list = Post.objects.select_related('author').filter(
         author__following__user=request.user)
-    paginator = Paginator(post_list, PAGINATION_NUM)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = pagination(request,
+                          post_list, PAGINATION_NUM)
     context = {'page_obj': page_obj, }
     return render(request, 'posts/follow.html', context)
 
@@ -137,6 +128,17 @@ def profile_follow(request, username):
         Follow.objects.get_or_create(user=user, author=author)
     return redirect('posts:profile', username=username)
 
+
+@login_required
+def current_author(request, username):
+    author = get_object_or_404(User, username=username)
+    user = request.user
+    if user == author:
+        Follow.objects.all(author=author)
+    else:
+        Follow.objects.create(user=user, author=author)
+    return redirect('posts:profile', username=username)
+    
 
 @login_required
 def profile_unfollow(request, username):
