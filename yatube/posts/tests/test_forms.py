@@ -37,7 +37,7 @@ class PostFormTests(TestCase):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
-    def test_create_post(self, form, field, errors, msg_prefix=""):
+    def test_create_post(self):
         posts_count = Post.objects.count()
 
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
