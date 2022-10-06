@@ -37,7 +37,7 @@ class PostFormTests(TestCase):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
-    def test_create_post(self):
+    def test_create_post(self, form, field, errors, msg_prefix=""):
         posts_count = Post.objects.count()
 
         small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
@@ -66,8 +66,7 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(Post.objects.filter(text='Тестовый текст').exists())
-        self.assertFormError(posts_count, 'errors', 'context')
-
+        self.assertFormError(field, errors, msg_prefix=msg_prefix)
     def test_edit_post(self):
         old_post = self.post
         form_data = {
