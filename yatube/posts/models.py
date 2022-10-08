@@ -39,17 +39,15 @@ class Post(models.Model):
         upload_to='posts/',
         blank=True
     )
-    
-    
+
     class Meta:
         ordering = ['-pub_date']
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
         UniqueConstraint(
-        fields=['user', 'author'],
-        name='unique_together',
-    )
-
+            fields=['user', 'author'],
+            name='unique_together',
+        )
 
     def __str__(self):
         return self.text[:15]
@@ -78,8 +76,8 @@ class Comment(models.Model):
 
 class Follow(models.Model):
     unique_together = (
-            'user',
-            'author'
+        'user',
+        'author'
         )
     user = models.ForeignKey(
         User,
