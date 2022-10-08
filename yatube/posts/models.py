@@ -78,7 +78,7 @@ class Follow(models.Model):
     unique_together = (
         'user',
         'author'
-        )
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
