@@ -127,17 +127,6 @@ def profile_follow(request, username):
 
 
 @login_required
-def current_author(request, username):
-    author = get_object_or_404(User, username=username)
-    user = request.user
-    if user == author:
-        Follow.objects.all(author=author)
-    else:
-        Follow.objects.create(user=user, author=author)
-    return redirect('posts:profile', username=username)
-
-
-@login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     if author == request.user:
