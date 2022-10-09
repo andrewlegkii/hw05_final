@@ -86,6 +86,6 @@ class Follow(models.Model):
                 filter(user=self.user, author=self.author).\
                 exists():
             raise ValidationError(
-                message='Действия невозможно',
+                message='Действие невозможно',
                 code='unique_together',
             )
