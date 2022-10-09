@@ -83,7 +83,7 @@ class Follow(models.Model):
         super(Follow, self).validate_unique(args, kwargs)
 
         if self.__class__.objects.\
-                filter(fk=self.user, my_field=self.author).\
+                filter(user=self.user, author=self.author).\
                 exists():
             raise ValidationError(
                 message='Действия невозможно',
