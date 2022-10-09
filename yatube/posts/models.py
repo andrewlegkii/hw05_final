@@ -43,7 +43,7 @@ class Post(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
-        unique_together = ('user','author')
+        unique_together = ('user', 'author')
 
     def __str__(self):
         return self.text[:15]
@@ -79,6 +79,7 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following')
+    
     def validate_unique(self, args, kwargs):
         super(Follow, self).validate_unique(args, kwargs)
 
