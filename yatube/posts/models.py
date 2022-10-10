@@ -43,7 +43,6 @@ class Post(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
-        unique_together = ('user', 'author')
 
     def __str__(self):
         return self.text[:15]
