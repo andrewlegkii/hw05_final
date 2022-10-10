@@ -79,6 +79,9 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following')
+    
+    class Meta:
+        unique_together = ('user', 'author',)
 
     def validate_unique(self, args, kwargs):
         super(Follow, self).validate_unique(args, kwargs)
